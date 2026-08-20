@@ -1,0 +1,6 @@
+@simulador_de_banco_HostAddress = http://localhost:5234
+
+GET {{simulador_de_banco_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
