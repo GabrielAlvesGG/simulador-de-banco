@@ -1,6 +1,6 @@
-using simulador_de_banco.Application.Interface;
+using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
+using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Application.Services;
-using simulador_de_banco.Infrastructure.Interface;
 using simulador_de_banco.Infrastructure.Repostory;
 
 var builder = WebApplication.CreateBuilder(args);

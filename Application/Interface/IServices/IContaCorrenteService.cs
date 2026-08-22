@@ -1,4 +1,4 @@
-﻿namespace simulador_de_banco.Application.Interface
+﻿namespace simulador_de_banco.Application.Interface.IServices
 {
     public interface IContaCorrenteService
     {

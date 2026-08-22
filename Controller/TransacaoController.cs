@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using simulador_de_banco.Application.Interface;
+using simulador_de_banco.Application.Interface.IServices;
 
 namespace simulador_de_banco.Controller
 {

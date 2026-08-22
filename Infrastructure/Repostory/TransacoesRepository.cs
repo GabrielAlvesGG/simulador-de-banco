@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
+using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.Services;
-using simulador_de_banco.Infrastructure.Interface;
-using System.Net.Http;
 using System.Net.Mail;
 
 namespace simulador_de_banco.Infrastructure.Repostory

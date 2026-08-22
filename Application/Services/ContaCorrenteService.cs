@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Json;
 using System.Net.Mail;
 using Microsoft.Data.SqlClient;
-using simulador_de_banco.Application.Interface;
-using simulador_de_banco.Infrastructure.Interface;
+using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
+using simulador_de_banco.Application.Interface.IServices;
 
 namespace simulador_de_banco.Application.Services
 {

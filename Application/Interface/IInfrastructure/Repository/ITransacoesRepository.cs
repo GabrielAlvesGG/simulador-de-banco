@@ -1,6 +1,6 @@
 ﻿using simulador_de_banco.Application.Services;
 
-namespace simulador_de_banco.Infrastructure.Interface
+namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
 {
     public interface ITransacoesRepository
     {
