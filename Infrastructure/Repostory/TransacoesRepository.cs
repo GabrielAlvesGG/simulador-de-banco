@@ -1,34 +1,28 @@
-﻿using System.Net.Http.Json;
+﻿using Microsoft.Data.SqlClient;
+using simulador_de_banco.Application.Services;
+using simulador_de_banco.Infrastructure.Interface;
+using System.Net.Http;
 using System.Net.Mail;
-using Microsoft.Data.SqlClient;
 
-namespace simulador_de_banco.Services
-{  
-
-    public class ContaCorrenteService
+namespace simulador_de_banco.Infrastructure.Repostory
+{
+    public class TransacoesRepository : ITransacoesRepository
     {
         private readonly string _connectionString;
         private readonly HttpClient _httpClient;
-
-        public ContaCorrenteService(
-            IConfiguration configuration,
-            HttpClient httpClient)
+        public TransacoesRepository(IConfiguration configuration, HttpClient httpClient)
         {
-            _connectionString =
-                configuration.GetConnectionString("Banco")
-                ?? throw new InvalidOperationException(
+            _connectionString = configuration.GetConnectionString("ConnectionStrings") ?? throw new InvalidOperationException(
                     "A conexão com o banco não foi configurada.");
-
             _httpClient = httpClient;
         }
 
         public async Task<ResultadoTransferencia> TransferirAsync(
-            int contaOrigemId,
-            int contaDestinoId,
-            decimal valor,
-            CancellationToken cancellationToken = default)
+           int contaOrigemId,
+           int contaDestinoId,
+           decimal valor,
+           CancellationToken cancellationToken = default)
         {
-            // Responsabilidade 1: validação dos parâmetros
             if (contaOrigemId <= 0)
                 throw new ArgumentException("Conta de origem inválida.");
 
@@ -43,7 +37,6 @@ namespace simulador_de_banco.Services
                 throw new ArgumentException(
                     "O valor da transferência deve ser maior que zero.");
 
-            // Responsabilidade 2: conexão com banco de dados
             await using var connection =
                 new SqlConnection(_connectionString);
 
@@ -55,21 +48,18 @@ namespace simulador_de_banco.Services
 
             try
             {
-                // Responsabilidade 3: consulta direta da conta de origem
                 var contaOrigem = await BuscarContaAsync(
                     contaOrigemId,
                     connection,
                     transaction,
                     cancellationToken);
 
-                // Responsabilidade 4: consulta direta da conta de destino
                 var contaDestino = await BuscarContaAsync(
                     contaDestinoId,
                     connection,
                     transaction,
                     cancellationToken);
 
-                // Responsabilidade 5: regras de negócio
                 if (contaOrigem is null)
                     throw new InvalidOperationException(
                         "Conta de origem não encontrada.");
@@ -96,7 +86,6 @@ namespace simulador_de_banco.Services
                     throw new InvalidOperationException(
                         "O valor ultrapassa o limite diário permitido.");
 
-                // Responsabilidade 6: integração com API externa
                 var analiseAntifraude = new
                 {
                     ContaOrigem = contaOrigemId,
@@ -291,6 +280,7 @@ namespace simulador_de_banco.Services
             }
         }
 
+        // É voltado para parte de infra/repo
         private static async Task<ContaCorrente?> BuscarContaAsync(
             int contaId,
             SqlConnection connection,
@@ -331,6 +321,8 @@ namespace simulador_de_banco.Services
             };
         }
 
+
+        // É voltado para parte de infra/repo
         private static async Task AtualizarSaldoAsync(
             int contaId,
             decimal novoSaldo,
@@ -357,34 +349,6 @@ namespace simulador_de_banco.Services
                 throw new InvalidOperationException(
                     "Não foi possível atualizar o saldo da conta.");
         }
-    }
 
-    public class ContaCorrente
-    {
-        public int Id { get; set; }
-        public string Numero { get; set; } = string.Empty;
-        public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public decimal Saldo { get; set; }
-        public bool Ativa { get; set; }
-    }
-
-    public class ResultadoAntifraude
-    {
-        public bool Aprovado { get; set; }
-        public string? Motivo { get; set; }
-    }
-
-    public class ResultadoTransferencia
-    {
-        public Guid TransferenciaId { get; set; }
-        public int ContaOrigemId { get; set; }
-        public int ContaDestinoId { get; set; }
-        public decimal Valor { get; set; }
-        public decimal SaldoAnterior { get; set; }
-        public decimal SaldoAtual { get; set; }
-        public DateTime DataTransferencia { get; set; }
-        public string CaminhoExtrato { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
     }
 }
