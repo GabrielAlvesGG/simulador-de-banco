@@ -1,4 +1,4 @@
-﻿using simulador_de_banco.Application.Services;
+﻿using simulador_de_banco.Application.DTO;
 
 namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
 {
