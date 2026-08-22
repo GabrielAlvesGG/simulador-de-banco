@@ -17,6 +17,20 @@ namespace simulador_de_banco.Application.Services
 
         public async Task TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
         {
+            if (idContaOrigem <= 0)
+                throw new ArgumentException("Conta de origem inválida.");
+
+            if (idContaDestino <= 0)
+                throw new ArgumentException("Conta de destino inválida.");
+
+            if (idContaOrigem == idContaDestino)
+                throw new InvalidOperationException(
+                    "As contas de origem e destino devem ser diferentes.");
+
+            if (valor <= 0)
+                throw new ArgumentException(
+                    "O valor da transferência deve ser maior que zero.");
+
             await _transacoesRepository.TransferirAsync(idContaOrigem, idContaDestino, valor, cancellationToken);
         }
 

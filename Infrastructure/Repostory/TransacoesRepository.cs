@@ -25,19 +25,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
            decimal valor,
            CancellationToken cancellationToken = default)
         {
-            if (contaOrigemId <= 0)
-                throw new ArgumentException("Conta de origem inválida.");
-
-            if (contaDestinoId <= 0)
-                throw new ArgumentException("Conta de destino inválida.");
-
-            if (contaOrigemId == contaDestinoId)
-                throw new InvalidOperationException(
-                    "As contas de origem e destino devem ser diferentes.");
-
-            if (valor <= 0)
-                throw new ArgumentException(
-                    "O valor da transferência deve ser maior que zero.");
+         
 
             await using var connection =
                 new SqlConnection(_connectionString);
