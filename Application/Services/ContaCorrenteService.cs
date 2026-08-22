@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Json;
-using System.Net.Mail;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.Interface.IServices;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Json;
+using System.Net.Mail;
 
 namespace simulador_de_banco.Application.Services
 {
@@ -17,6 +18,13 @@ namespace simulador_de_banco.Application.Services
 
         public async Task TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
         {
+            Validate(idContaOrigem, idContaDestino, valor);
+
+            await _transacoesRepository.TransferirAsync(idContaOrigem, idContaDestino, valor, cancellationToken);
+        }
+
+        private void Validate(int idContaOrigem, int idContaDestino, decimal valor)
+        {
             if (idContaOrigem <= 0)
                 throw new ArgumentException("Conta de origem inválida.");
 
@@ -30,8 +38,6 @@ namespace simulador_de_banco.Application.Services
             if (valor <= 0)
                 throw new ArgumentException(
                     "O valor da transferência deve ser maior que zero.");
-
-            await _transacoesRepository.TransferirAsync(idContaOrigem, idContaDestino, valor, cancellationToken);
         }
 
     }

@@ -50,6 +50,8 @@ namespace simulador_de_banco.Infrastructure.Repostory
                     transaction,
                     cancellationToken);
 
+
+                // Jogar para servicess começo
                 if (contaOrigem is null)
                     throw new InvalidOperationException(
                         "Conta de origem não encontrada.");
@@ -75,7 +77,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
                 if (valor > limiteDiario)
                     throw new InvalidOperationException(
                         "O valor ultrapassa o limite diário permitido.");
-
+                // Jogar para servicess fim 
                 var analiseAntifraude = new
                 {
                     ContaOrigem = contaOrigemId,
