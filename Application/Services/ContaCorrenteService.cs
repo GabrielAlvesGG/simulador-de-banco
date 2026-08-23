@@ -1,12 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
-using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
+﻿using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Domain.Entidade;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Json;
-using System.Net.Mail;
-using System.Runtime.CompilerServices;
 
 namespace simulador_de_banco.Application.Services
 {
@@ -58,18 +53,18 @@ namespace simulador_de_banco.Application.Services
                 contaOrigem.Saldo = contaOrigem.Saldo - valor;
                 contaDestino.Saldo = contaDestino.Saldo + valor;
 
-                _transacoesRepository.AtualizarSaldoAsync(contaOrigem.Id, contaOrigem.Saldo, cancellationToken);
-                _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
+                await _transacoesRepository.AtualizarSaldoAsync(contaOrigem.Id, contaOrigem.Saldo, cancellationToken);
+                await _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
 
-                _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
+                await _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
 
-                _unitOfWork.CommitAsync(cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
 
                 // Colocar a questão da notificação para ser feita. Próximo passo.
             }
             catch (Exception ex)
             {
-                _unitOfWork.RollbackAsync(cancellationToken);
+                await _unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
         }

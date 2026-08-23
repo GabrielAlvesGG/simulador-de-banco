@@ -13,8 +13,11 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IContaCorrenteService,ContaCorrenteService>();
 builder.Services.AddScoped<ITransacoesRepository, TransacoesRepository>();
-builder.Services.AddScoped<ISqlUnitOfWork, SqlUnitOfWork>();
-builder.Services.AddScoped<IUnitOfWork, SqlUnitOfWork>();
+
+builder.Services.AddScoped<SqlUnitOfWork>();
+
+builder.Services.AddScoped<ISqlUnitOfWork>(provider => provider.GetRequiredService<SqlUnitOfWork>());
+builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<SqlUnitOfWork>());
 
 builder.Services.AddScoped<HttpClient>();
 
