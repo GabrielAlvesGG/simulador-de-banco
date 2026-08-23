@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using simulador_de_banco.Application.DTO;
 using simulador_de_banco.Application.Interface.IServices;
 
 namespace simulador_de_banco.Controller
@@ -15,9 +16,9 @@ namespace simulador_de_banco.Controller
 
         [HttpPost]
         // GET: HomeController
-        public async Task<ActionResult> Transacao(int idContaOrigem, int idContaDestino,decimal valor, CancellationToken cancellationToken)
+        public async Task<ActionResult> Transacao(TransacaoRequestDto transacaoRequestDto, CancellationToken cancellationToken)
         {
-            return Ok(await _contaCorrenteService.TransferirAsync(idContaOrigem, idContaDestino, valor, cancellationToken));
+            return Ok(await _contaCorrenteService.TransferirAsync(transacaoRequestDto, cancellationToken));
         }
     }
 }

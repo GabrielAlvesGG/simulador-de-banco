@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Domain.Entidade;
-using simulador_de_banco.Infrastructure.Persistence;
+using simulador_de_banco.Infrastructure.Persistence.Interface;
 
 
 namespace simulador_de_banco.Infrastructure.Repostory

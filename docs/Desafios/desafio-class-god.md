@@ -29,3 +29,6 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 		* Nesse trecho da refatoração, foi retirado toda a questão de validação do antifraude do repository e implementado no seu devido lugar dentro da infrastructure criado uma interface para que a application consiga requisita a validação da antifraude e não precise saber de seu contexto de validação da transação.
 		* O trecho que foi refatorado agora está relacionado ao email, consegui refatorar o email e colocar ele nos diretório devido a ele para suas responsabilidades. 
 		* Implementado refatoração também da questão de extrato de dados fazendo com que o estrato seja salvo dentro do servidor assim que é feito a transação.
+		
+		* Agora focando em refatoração dos parâmetros
+		* na refatoração dos parâmetros tive que entender melhor como funciona cada parte de camadas e qual camada podia conhecer parâmetros e instancias de outra camda a interface da application não pode conhecer classe relacionadas a repository por exemplo. Então tive que fazer uma boa refatoração para conseguir encapsular corretamente as propriedades.

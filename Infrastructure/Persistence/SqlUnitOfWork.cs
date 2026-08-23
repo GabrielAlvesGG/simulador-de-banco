@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
+using simulador_de_banco.Infrastructure.Persistence.Interface;
 using System.Data;
 
 namespace simulador_de_banco.Infrastructure.Persistence

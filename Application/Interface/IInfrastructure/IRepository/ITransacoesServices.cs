@@ -1,5 +1,4 @@
-﻿using simulador_de_banco.Application.DTO;
-using simulador_de_banco.Domain.Entidade;
+﻿using simulador_de_banco.Domain.Entidade;
 
 namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
 {

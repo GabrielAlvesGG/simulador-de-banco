@@ -1,22 +1,22 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Antifraude;
-using simulador_de_banco.Infrastructure.Integrations.Antifraude.Models;
+﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration.IAntifraude;
+using simulador_de_banco.Domain.Entidade;
 
-namespace simulador_de_banco.Infrastructure.Integrations.Antifraude
+namespace simulador_de_banco.Infrastructure.Integrations.AntifraudeClientIntegrations
 {
-    public class AntifraudeClient : IAntifraudeServices
+    public class AntifraudeClientIntegrations : IAntifraudeServices
     {
         private readonly HttpClient _httpClient;
-        public AntifraudeClient(HttpClient httpClient)
+        public AntifraudeClientIntegrations(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-        public async Task AntifraudeVerificaTransacao(int contaOrigemId,int contaDestinoId,decimal valor, CancellationToken cancellationToken)
+        public async Task<ResultadoAntiFraude> AntifraudeVerificaTransacao(Antifraude antifraudeRequest, CancellationToken cancellationToken)
         {
             var analiseAntifraude = new
             {
-                ContaOrigem = contaOrigemId,
-                ContaDestino = contaDestinoId,
-                Valor = valor,
+                ContaOrigem = antifraudeRequest.IdContaOrigem,
+                ContaDestino = antifraudeRequest.IdContaDestino,
+                Valor = antifraudeRequest.Valor,
                 DataOperacao = DateTime.UtcNow
             };
 
@@ -31,7 +31,7 @@ namespace simulador_de_banco.Infrastructure.Integrations.Antifraude
 
             var resultadoAntifraude =
                 await respostaAntifraude.Content
-                    .ReadFromJsonAsync<ResultadoAntiFraudeResponse>(
+                    .ReadFromJsonAsync<ResultadoAntiFraude>(
                         cancellationToken: cancellationToken);
 
             if (resultadoAntifraude is null ||
@@ -40,6 +40,8 @@ namespace simulador_de_banco.Infrastructure.Integrations.Antifraude
                 throw new InvalidOperationException(
                     "Transferência recusada pelo serviço antifraude.");
             }
+
+            return resultadoAntifraude; 
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using simulador_de_banco.Application.DTO;
-using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Antifraude;
+using simulador_de_banco.Application.Interface.IInfrastructure.Integration.IAntifraude;
 using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Email;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
@@ -31,28 +31,36 @@ namespace simulador_de_banco.Application.Services
             _extratorServices = extratoServices;
         }
 
-        public async Task<ResultadoTransferenciaDto> TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
+        public async Task<ResultadoTransferenciaResponseDto> TransferirAsync(TransacaoRequestDto transacaoRequestDto, CancellationToken cancellationToken)
         {
-            ValidateTransacao(idContaOrigem, idContaDestino, valor);
+            ValidateTransacao(transacaoRequestDto);
+
+            Antifraude antifraudeRequest = new Antifraude() { 
+            IdContaDestino = transacaoRequestDto.IdContaDestino,
+            IdContaOrigem = transacaoRequestDto.IdContaOrigem,
+            Valor = transacaoRequestDto.Valor            
+            };
+
+            await _antifraudeService.AntifraudeVerificaTransacao(antifraudeRequest, cancellationToken);
 
             await _unitOfWork.BeginAsync(cancellationToken);
             try
             {
           
-                ContaCorrente? contaOrigem = await _transacoesRepository.BuscarContaAsync(idContaOrigem,cancellationToken);
+                ContaCorrente? contaOrigem = await _transacoesRepository.BuscarContaAsync(transacaoRequestDto.IdContaOrigem,cancellationToken);
 
                 if (contaOrigem is null)
                     throw new InvalidOperationException(
                         "Conta de origem não encontrada.");
 
-                if (contaOrigem.Saldo < valor)
+                if (contaOrigem.Saldo < transacaoRequestDto.Valor)
                     throw new InvalidOperationException("Saldo insuficiente.");
 
                 if (!contaOrigem.Ativa)
                     throw new InvalidOperationException(
                         "A conta de origem está bloqueada.");
 
-                ContaCorrente? contaDestino = await _transacoesRepository.BuscarContaAsync(idContaDestino, cancellationToken);
+                ContaCorrente? contaDestino = await _transacoesRepository.BuscarContaAsync(transacaoRequestDto.IdContaDestino, cancellationToken);
 
                 if (contaDestino is null)
                     throw new InvalidOperationException(
@@ -62,41 +70,44 @@ namespace simulador_de_banco.Application.Services
                     throw new InvalidOperationException(
                         "A conta de destino está bloqueada.");
 
-                await _antifraudeService.AntifraudeVerificaTransacao(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
 
 
-                // Abstrair para um método privado 
                 decimal saldoAntigoContaOrigem = contaOrigem.Saldo;
 
-                contaOrigem.Saldo = contaOrigem.Saldo - valor; 
+                contaOrigem.Saldo = contaOrigem.Saldo - transacaoRequestDto.Valor; 
 
-                contaDestino.Saldo = contaDestino.Saldo + valor;
+                contaDestino.Saldo = contaDestino.Saldo + transacaoRequestDto.Valor;
 
                 await _transacoesRepository.AtualizarSaldoAsync(contaOrigem.Id, contaOrigem.Saldo, cancellationToken);
 
                 await _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
 
-               Guid transferenciaId =  await _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
+               Guid transferenciaId =  await _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, transacaoRequestDto.Valor, cancellationToken);
 
                 await _unitOfWork.CommitAsync(cancellationToken);
 
-                await _emailServices.EmailTransacao(
-                    contaOrigem.Email,
-                    contaOrigem.Nome,
-                    contaDestino.Id,
-                    valor,
-                    contaOrigem.Saldo,
-                    transferenciaId, 
-                    cancellationToken);
+                TransacaoEmailEnviar transacaoEmailEnviarRequest = new TransacaoEmailEnviar()
+                {
+                    Email = contaOrigem.Email,
+                    Nome = contaOrigem.Nome,
+                    ContaDestinoId = contaDestino.Id,
+                    Valor = transacaoRequestDto.Valor,
+                    Saldo = contaOrigem.Saldo,
+                    TransferenciaId = transferenciaId,
 
-                string caminhoExtrato = await _extratorServices.GerarExtratoTransacao(transferenciaId, contaOrigem.Id, contaDestino.Id, valor, saldoAntigoContaOrigem, contaOrigem.Saldo, cancellationToken);
+                };
 
-                return new ResultadoTransferenciaDto
+                await _emailServices.EmailTransacaoContaOrigem(
+                    transacaoEmailEnviarRequest, cancellationToken);
+
+                string caminhoExtrato = await _extratorServices.GerarExtratoTransacao(transferenciaId, contaOrigem.Id, contaDestino.Id, transacaoRequestDto.Valor, saldoAntigoContaOrigem, contaOrigem.Saldo, cancellationToken);
+
+                return new ResultadoTransferenciaResponseDto
                 {
                     TransferenciaId = transferenciaId,
                     ContaOrigemId = contaOrigem.Id,
                     ContaDestinoId = contaDestino.Id,
-                    Valor = valor,
+                    Valor = transacaoRequestDto.Valor,
                     SaldoAnterior = saldoAntigoContaOrigem,
                     SaldoAtual = contaOrigem.Saldo,
                     DataTransferencia = DateTime.UtcNow,
@@ -111,28 +122,28 @@ namespace simulador_de_banco.Application.Services
             }
         }
 
-        private void ValidateTransacao(int idContaOrigem, int idContaDestino, decimal valor)
+        private void ValidateTransacao(TransacaoRequestDto transacaoRequestDto)
         {
 
             var limiteDiario = 10_000m;
 
-            if (valor > limiteDiario)
+            if (transacaoRequestDto.Valor > limiteDiario)
                 throw new InvalidOperationException(
-                    "O valor ultrapassa o limite diário permitido.");
+                    "O transacaoRequestDto.Valor ultrapassa o limite diário permitido.");
 
-            if (idContaOrigem <= 0)
+            if (transacaoRequestDto.IdContaOrigem <= 0)
                 throw new ArgumentException("Conta de origem inválida.");
 
-            if (idContaDestino <= 0)
+            if (transacaoRequestDto.IdContaDestino <= 0)
                 throw new ArgumentException("Conta de destino inválida.");
 
-            if (idContaOrigem == idContaDestino)
+            if (transacaoRequestDto.IdContaOrigem == transacaoRequestDto.IdContaDestino)
                 throw new InvalidOperationException(
                     "As contas de origem e destino devem ser diferentes.");
 
-            if (valor <= 0)
+            if (transacaoRequestDto.Valor <= 0)
                 throw new ArgumentException(
-                    "O valor da transferência deve ser maior que zero.");
+                    "O transacaoRequestDto.Valor da transferência deve ser maior que zero.");
         }
 
     }
