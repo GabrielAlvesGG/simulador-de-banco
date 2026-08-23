@@ -15,7 +15,7 @@ namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
             decimal novoSaldo,
             CancellationToken cancellationToken);
 
-        public Task<Guid> RegistrarMovimentacaoAsync(int contaOrigemId, int contaDestinoId, decimal valor, CancellationToken cancellationToken);
+        public Task<Guid> RegistrarMovimentacaoAsync(Movimentacao movimentacao, CancellationToken cancellationToken);
 
     }
 }

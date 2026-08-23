@@ -86,7 +86,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
                     "Não foi possível atualizar o saldo da conta.");
         }
 
-        public async Task<Guid> RegistrarMovimentacaoAsync(int contaOrigemId,int contaDestinoId,decimal valor,CancellationToken cancellationToken)
+        public async Task<Guid> RegistrarMovimentacaoAsync(Movimentacao movimentacao, CancellationToken cancellationToken)
         {
             var transferenciaId = Guid.NewGuid();
 
@@ -129,15 +129,15 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@ContaOrigemId",
-                contaOrigemId);
+                movimentacao.ContaOrigemId);
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@ContaDestinoId",
-                contaDestinoId);
+                movimentacao.ContaDestinoId);
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@Valor",
-                valor);
+                movimentacao.Valor);
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@DataMovimentacao",

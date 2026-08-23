@@ -85,7 +85,14 @@ namespace simulador_de_banco.Application.Services
 
                 await _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
 
-               Guid transferenciaId =  await _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, transacaoRequestDto.Valor, cancellationToken);
+                Movimentacao movimentacao = new Movimentacao()
+                {
+                    ContaOrigemId= contaOrigem.Id,
+                    ContaDestinoId= contaDestino.Id, 
+                    Valor = transacaoRequestDto.Valor,
+                };
+
+               Guid transferenciaId =  await _transacoesRepository.RegistrarMovimentacaoAsync(movimentacao, cancellationToken);
 
                 await _unitOfWork.CommitAsync(cancellationToken);
 
