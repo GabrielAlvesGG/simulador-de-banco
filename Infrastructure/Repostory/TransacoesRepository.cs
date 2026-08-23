@@ -86,7 +86,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
                     "Não foi possível atualizar o saldo da conta.");
         }
 
-        public async Task<Guid> RegistrarMovimentacaoAsync(Movimentacao movimentacao, CancellationToken cancellationToken)
+        public async Task RegistrarMovimentacaoAsync(Movimentacao movimentacao, CancellationToken cancellationToken)
         {
 
             const string insertMovimentacao = """
@@ -153,7 +153,6 @@ namespace simulador_de_banco.Infrastructure.Repostory
             await commandMovimentacao.ExecuteNonQueryAsync(
                 cancellationToken);
 
-            return movimentacao.Id;
 
         }
 

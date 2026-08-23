@@ -86,8 +86,7 @@ namespace simulador_de_banco.Application.Services
                 await _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
 
                 Movimentacao movimentacao = new Movimentacao(contaOrigem.Id, contaDestino.Id, transacaoRequestDto.Valor);
-
-               Guid transferenciaId =  await _transacoesRepository.RegistrarMovimentacaoAsync(movimentacao, cancellationToken);
+                await _transacoesRepository.RegistrarMovimentacaoAsync(movimentacao, cancellationToken);
 
                 await _unitOfWork.CommitAsync(cancellationToken);
 
@@ -98,7 +97,7 @@ namespace simulador_de_banco.Application.Services
                     ContaDestinoId = contaDestino.Id,
                     Valor = transacaoRequestDto.Valor,
                     Saldo = contaOrigem.Saldo,
-                    TransferenciaId = transferenciaId,
+                    TransferenciaId = movimentacao.Id,
 
                 };
 
@@ -107,7 +106,7 @@ namespace simulador_de_banco.Application.Services
 
                 ExtratoBancarioTransacao extratoBancarioTransacao = new ExtratoBancarioTransacao()
                 {
-                    TransferenciaId = transferenciaId,
+                    TransferenciaId = movimentacao.Id,
                     ContaOrigemId = contaOrigem.Id,
                     ContaDestinoId = contaDestino.Id,
                     Valor = transacaoRequestDto.Valor,
@@ -119,7 +118,7 @@ namespace simulador_de_banco.Application.Services
 
                 return new ResultadoTransferenciaResponseDto
                 {
-                    TransferenciaId = transferenciaId,
+                    TransferenciaId = movimentacao.Id,
                     ContaOrigemId = contaOrigem.Id,
                     ContaDestinoId = contaDestino.Id,
                     Valor = transacaoRequestDto.Valor,
