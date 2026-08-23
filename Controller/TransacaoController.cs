@@ -17,9 +17,7 @@ namespace simulador_de_banco.Controller
         // GET: HomeController
         public async Task<ActionResult> Transacao(int idContaOrigem, int idContaDestino,decimal valor, CancellationToken cancellationToken)
         {
-            await _contaCorrenteService.TransferirAsync(idContaOrigem, idContaDestino, valor, cancellationToken);
-            return Ok("Transação feita com sucesso. ");
+            return Ok(await _contaCorrenteService.TransferirAsync(idContaOrigem, idContaDestino, valor, cancellationToken));
         }
-
     }
 }

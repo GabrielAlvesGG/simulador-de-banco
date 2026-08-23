@@ -5,11 +5,6 @@ namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
 {
     public interface ITransacoesServices
     {
-        //public Task<ResultadoTransferenciaDto> TransferirAsync(
-        //  int contaOrigemId,
-        //  int contaDestinoId,
-        //  decimal valor,
-        //  CancellationToken cancellationToken = default);
 
         public Task<ContaCorrente?> BuscarContaAsync(
             int contaId,
@@ -21,7 +16,7 @@ namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
             decimal novoSaldo,
             CancellationToken cancellationToken);
 
-        public Task RegistrarMovimentacaoAsync(int contaOrigemId, int contaDestinoId, decimal valor, CancellationToken cancellationToken);
+        public Task<Guid> RegistrarMovimentacaoAsync(int contaOrigemId, int contaDestinoId, decimal valor, CancellationToken cancellationToken);
 
     }
 }

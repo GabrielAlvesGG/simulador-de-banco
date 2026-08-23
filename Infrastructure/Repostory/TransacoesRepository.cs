@@ -120,33 +120,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
         //        await transaction.CommitAsync(cancellationToken);
 
         //        // Responsabilidade 10: envio de e-mail
-        //        using var smtpClient = new SmtpClient(
-        //            "smtp.exemplo.com",
-        //            587);
-
-        //        smtpClient.EnableSsl = true;
-
-        //        using var mensagem = new MailMessage(
-        //            "banco@exemplo.com",
-        //            contaOrigem.Email);
-
-        //        mensagem.Subject = "Transferência realizada";
-
-        //        mensagem.Body = $"""
-        //        Olá, {contaOrigem.Nome}.
-
-        //        Sua transferência foi realizada com sucesso.
-
-        //        Conta de destino: {contaDestino.Numero}
-        //        Valor: {valor:C}
-        //        Saldo atual: {novoSaldoOrigem:C}
-        //        Código: {transferenciaId}
-        //        """;
-
-        //        await smtpClient.SendMailAsync(
-        //            mensagem,
-        //            cancellationToken);
-
+        //       
         //        // Responsabilidade 11: geração de extrato
         //        var extrato = $"""
         //        BANCO EXEMPLO
@@ -274,7 +248,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
                     "Não foi possível atualizar o saldo da conta.");
         }
 
-        public async Task RegistrarMovimentacaoAsync(int contaOrigemId,int contaDestinoId,decimal valor,CancellationToken cancellationToken)
+        public async Task<Guid> RegistrarMovimentacaoAsync(int contaOrigemId,int contaDestinoId,decimal valor,CancellationToken cancellationToken)
         {
             // Responsabilidade 9: gravação da movimentação
             var transferenciaId = Guid.NewGuid();
@@ -342,6 +316,8 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
             await commandMovimentacao.ExecuteNonQueryAsync(
                 cancellationToken);
+
+            return transferenciaId;
 
         }
 

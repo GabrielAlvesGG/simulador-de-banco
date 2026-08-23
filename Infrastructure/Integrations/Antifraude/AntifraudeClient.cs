@@ -1,7 +1,7 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration;
-using simulador_de_banco.Infrastructure.Integrations.Models;
+﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Antifraude;
+using simulador_de_banco.Infrastructure.Integrations.Antifraude.Models;
 
-namespace simulador_de_banco.Infrastructure.Integrations
+namespace simulador_de_banco.Infrastructure.Integrations.Antifraude
 {
     public class AntifraudeClient : IAntifraudeServices
     {

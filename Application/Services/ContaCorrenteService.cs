@@ -1,4 +1,6 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration;
+﻿using simulador_de_banco.Application.DTO;
+using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Antifraude;
+using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Email;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.Interface.IServices;
@@ -13,14 +15,17 @@ namespace simulador_de_banco.Application.Services
 
         private readonly ISqlUnitOfWorkServices _unitOfWork;
         private readonly IAntifraudeServices _antifraudeService;
-        public ContaCorrenteService(ITransacoesServices transacoesRepository, ISqlUnitOfWorkServices sqlUnitOfWork, IAntifraudeServices antifraudeService)
+        private readonly IEmailServices _emailServices;
+        public ContaCorrenteService(ITransacoesServices transacoesRepository, ISqlUnitOfWorkServices sqlUnitOfWork, IAntifraudeServices antifraudeService,
+            IEmailServices emailServices)
         {
             _transacoesRepository = transacoesRepository;
             _unitOfWork = sqlUnitOfWork;
             _antifraudeService = antifraudeService;
+            _emailServices = emailServices;
         }
 
-        public async Task TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
+        public async Task<ResultadoTransferenciaDto> TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
         {
             ValidateTransacao(idContaOrigem, idContaDestino, valor);
 
@@ -28,7 +33,7 @@ namespace simulador_de_banco.Application.Services
             try
             {
           
-                ContaCorrente contaOrigem = await _transacoesRepository.BuscarContaAsync(idContaOrigem,cancellationToken);
+                ContaCorrente? contaOrigem = await _transacoesRepository.BuscarContaAsync(idContaOrigem,cancellationToken);
 
                 if (contaOrigem is null)
                     throw new InvalidOperationException(
@@ -41,7 +46,7 @@ namespace simulador_de_banco.Application.Services
                     throw new InvalidOperationException(
                         "A conta de origem está bloqueada.");
 
-                ContaCorrente contaDestino = await _transacoesRepository.BuscarContaAsync(idContaDestino, cancellationToken);
+                ContaCorrente? contaDestino = await _transacoesRepository.BuscarContaAsync(idContaDestino, cancellationToken);
 
                 if (contaDestino is null)
                     throw new InvalidOperationException(
@@ -51,19 +56,45 @@ namespace simulador_de_banco.Application.Services
                     throw new InvalidOperationException(
                         "A conta de destino está bloqueada.");
 
-                _antifraudeService.AntifraudeVerificaTransacao(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
+                await _antifraudeService.AntifraudeVerificaTransacao(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
 
-                contaOrigem.Saldo = contaOrigem.Saldo - valor;
+
+                // Abstrair para um método privado 
+                decimal saldoAntigoContaOrigem = contaOrigem.Saldo;
+
+                contaOrigem.Saldo = contaOrigem.Saldo - valor; 
+
                 contaDestino.Saldo = contaDestino.Saldo + valor;
 
                 await _transacoesRepository.AtualizarSaldoAsync(contaOrigem.Id, contaOrigem.Saldo, cancellationToken);
+
                 await _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
 
-                await _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
+               Guid transferenciaId =  await _transacoesRepository.RegistrarMovimentacaoAsync(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
 
                 await _unitOfWork.CommitAsync(cancellationToken);
 
-                // Colocar a questão da notificação para ser feita. Próximo passo.
+                await _emailServices.EmailTransacao(
+                    contaOrigem.Email,
+                    contaOrigem.Nome,
+                    contaDestino.Id,
+                    valor,
+                    contaOrigem.Saldo,
+                    transferenciaId, 
+                    cancellationToken);
+
+                return new ResultadoTransferenciaDto
+                {
+                    TransferenciaId = transferenciaId,
+                    ContaOrigemId = contaOrigem.Id,
+                    ContaDestinoId = contaDestino.Id,
+                    Valor = valor,
+                    SaldoAnterior = saldoAntigoContaOrigem,
+                    SaldoAtual = contaOrigem.Saldo,
+                    DataTransferencia = DateTime.UtcNow,
+                    //CaminhoExtrato = caminhoExtrato,
+                    Status = "Concluída"
+                };
             }
             catch
             {

@@ -1,4 +1,4 @@
-﻿namespace simulador_de_banco.Application.Interface.IInfrastructure.Integration
+﻿namespace simulador_de_banco.Application.Interface.IInfrastructure.Integration.Antifraude
 {
     public interface IAntifraudeServices
     {

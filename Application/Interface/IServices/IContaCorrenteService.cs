@@ -1,8 +1,10 @@
-﻿namespace simulador_de_banco.Application.Interface.IServices
+﻿using simulador_de_banco.Application.DTO;
+
+namespace simulador_de_banco.Application.Interface.IServices
 {
     public interface IContaCorrenteService
     {
-        public Task TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken);
+        public Task<ResultadoTransferenciaDto> TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken);
 
     }
 }
