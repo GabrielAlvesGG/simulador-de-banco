@@ -1,4 +1,5 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
+﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration;
+using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Domain.Entidade;
@@ -8,13 +9,15 @@ namespace simulador_de_banco.Application.Services
 
     public class ContaCorrenteService : IContaCorrenteService
     {
-        private readonly ITransacoesRepository _transacoesRepository;
+        private readonly ITransacoesServices _transacoesRepository;
 
-        private readonly ISqlUnitOfWork _unitOfWork;
-        public ContaCorrenteService(ITransacoesRepository transacoesRepository, ISqlUnitOfWork sqlUnitOfWork)
+        private readonly ISqlUnitOfWorkServices _unitOfWork;
+        private readonly IAntifraudeServices _antifraudeService;
+        public ContaCorrenteService(ITransacoesServices transacoesRepository, ISqlUnitOfWorkServices sqlUnitOfWork, IAntifraudeServices antifraudeService)
         {
             _transacoesRepository = transacoesRepository;
             _unitOfWork = sqlUnitOfWork;
+            _antifraudeService = antifraudeService;
         }
 
         public async Task TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
@@ -48,7 +51,7 @@ namespace simulador_de_banco.Application.Services
                     throw new InvalidOperationException(
                         "A conta de destino está bloqueada.");
 
-                // Colocar algo para conseguir validar o antifraude. Próximo passo .
+                _antifraudeService.AntifraudeVerificaTransacao(contaOrigem.Id, contaDestino.Id, valor, cancellationToken);
 
                 contaOrigem.Saldo = contaOrigem.Saldo - valor;
                 contaDestino.Saldo = contaDestino.Saldo + valor;
@@ -62,7 +65,7 @@ namespace simulador_de_banco.Application.Services
 
                 // Colocar a questão da notificação para ser feita. Próximo passo.
             }
-            catch (Exception ex)
+            catch
             {
                 await _unitOfWork.RollbackAsync(cancellationToken);
                 throw;

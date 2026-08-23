@@ -4,7 +4,7 @@ using System.Data;
 
 namespace simulador_de_banco.Infrastructure.Persistence
 {
-    public sealed class SqlUnitOfWork : ISqlUnitOfWork, IUnitOfWork
+    public sealed class SqlUnitOfWork : ISqlUnitOfWorkServices, IUnitOfWork
     {
 
         private readonly SqlConnection _connection;

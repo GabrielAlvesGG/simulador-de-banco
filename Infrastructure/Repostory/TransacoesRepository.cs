@@ -1,17 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
-using simulador_de_banco.Application.DTO;
-using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Domain.Entidade;
-using simulador_de_banco.Infrastructure.IntegrationModel;
 using simulador_de_banco.Infrastructure.Persistence;
-using System.Net.Mail;
-using System.Transactions;
 
 
 namespace simulador_de_banco.Infrastructure.Repostory
 {
-    public class TransacoesRepository : ITransacoesRepository
+    public class TransacoesRepository : ITransacoesServices
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -38,34 +33,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
         //    {
                
         //        // Jogar para servicess fim 
-        //        var analiseAntifraude = new
-        //        {
-        //            ContaOrigem = contaOrigemId,
-        //            ContaDestino = contaDestinoId,
-        //            Valor = valor,
-        //            DataOperacao = DateTime.UtcNow
-        //        };
-
-        //        var respostaAntifraude = await _httpClient.PostAsJsonAsync(
-        //            "https://api-antifraude.exemplo.com/analises",
-        //            analiseAntifraude,
-        //            cancellationToken);
-
-        //        if (!respostaAntifraude.IsSuccessStatusCode)
-        //            throw new InvalidOperationException(
-        //                "Não foi possível consultar o serviço antifraude.");
-
-        //        var resultadoAntifraude =
-        //            await respostaAntifraude.Content
-        //                .ReadFromJsonAsync<ResultadoAntifraude>(
-        //                    cancellationToken: cancellationToken);
-
-        //        if (resultadoAntifraude is null ||
-        //            !resultadoAntifraude.Aprovado)
-        //        {
-        //            throw new InvalidOperationException(
-        //                "Transferência recusada pelo serviço antifraude.");
-        //        }
+        //  
 
         //        // Responsabilidade 7: cálculo dos novos saldos
         //        var novoSaldoOrigem = contaOrigem.Saldo - valor;

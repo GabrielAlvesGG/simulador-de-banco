@@ -1,6 +1,6 @@
 ﻿namespace simulador_de_banco.Application.Interface.IInfrastructure.Persistence
 {
-    public interface ISqlUnitOfWork
+    public interface ISqlUnitOfWorkServices
     {
         public Task BeginAsync(CancellationToken cancellationToken = default);
         public Task CommitAsync(CancellationToken cancellationToken = default);

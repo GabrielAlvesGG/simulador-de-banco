@@ -3,7 +3,7 @@ using simulador_de_banco.Domain.Entidade;
 
 namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
 {
-    public interface ITransacoesRepository
+    public interface ITransacoesServices
     {
         //public Task<ResultadoTransferenciaDto> TransferirAsync(
         //  int contaOrigemId,

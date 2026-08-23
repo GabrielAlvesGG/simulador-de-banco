@@ -1,7 +1,9 @@
+using simulador_de_banco.Application.Interface.IInfrastructure.Integration;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Application.Services;
+using simulador_de_banco.Infrastructure.Integrations;
 using simulador_de_banco.Infrastructure.Persistence;
 using simulador_de_banco.Infrastructure.Repostory;
 
@@ -12,11 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IContaCorrenteService,ContaCorrenteService>();
-builder.Services.AddScoped<ITransacoesRepository, TransacoesRepository>();
+builder.Services.AddScoped<ITransacoesServices, TransacoesRepository>();
+builder.Services.AddScoped<IAntifraudeServices, AntifraudeClient>();
 
 builder.Services.AddScoped<SqlUnitOfWork>();
 
-builder.Services.AddScoped<ISqlUnitOfWork>(provider => provider.GetRequiredService<SqlUnitOfWork>());
+builder.Services.AddScoped<ISqlUnitOfWorkServices>(provider => provider.GetRequiredService<SqlUnitOfWork>());
 builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<SqlUnitOfWork>());
 
 builder.Services.AddScoped<HttpClient>();
