@@ -3,6 +3,7 @@ using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Antif
 using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Email;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
+using simulador_de_banco.Application.Interface.IInfrastructure.Storage;
 using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Domain.Entidade;
 
@@ -16,13 +17,18 @@ namespace simulador_de_banco.Application.Services
         private readonly ISqlUnitOfWorkServices _unitOfWork;
         private readonly IAntifraudeServices _antifraudeService;
         private readonly IEmailServices _emailServices;
-        public ContaCorrenteService(ITransacoesServices transacoesRepository, ISqlUnitOfWorkServices sqlUnitOfWork, IAntifraudeServices antifraudeService,
-            IEmailServices emailServices)
+        private readonly IExtratoServices _extratorServices;
+        public ContaCorrenteService(ITransacoesServices transacoesRepository,
+            ISqlUnitOfWorkServices sqlUnitOfWork,
+            IAntifraudeServices antifraudeService,
+            IEmailServices emailServices,
+            IExtratoServices extratoServices)
         {
             _transacoesRepository = transacoesRepository;
             _unitOfWork = sqlUnitOfWork;
             _antifraudeService = antifraudeService;
             _emailServices = emailServices;
+            _extratorServices = extratoServices;
         }
 
         public async Task<ResultadoTransferenciaDto> TransferirAsync(int idContaOrigem, int idContaDestino, decimal valor, CancellationToken cancellationToken)
@@ -83,6 +89,8 @@ namespace simulador_de_banco.Application.Services
                     transferenciaId, 
                     cancellationToken);
 
+                string caminhoExtrato = await _extratorServices.GerarExtratoTransacao(transferenciaId, contaOrigem.Id, contaDestino.Id, valor, saldoAntigoContaOrigem, contaOrigem.Saldo, cancellationToken);
+
                 return new ResultadoTransferenciaDto
                 {
                     TransferenciaId = transferenciaId,
@@ -92,7 +100,7 @@ namespace simulador_de_banco.Application.Services
                     SaldoAnterior = saldoAntigoContaOrigem,
                     SaldoAtual = contaOrigem.Saldo,
                     DataTransferencia = DateTime.UtcNow,
-                    //CaminhoExtrato = caminhoExtrato,
+                    CaminhoExtrato = caminhoExtrato,
                     Status = "Concluída"
                 };
             }
