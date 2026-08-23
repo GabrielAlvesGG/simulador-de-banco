@@ -1,6 +1,6 @@
-﻿namespace simulador_de_banco.Domain.Entidade
+﻿namespace simulador_de_banco.Application.Antifraude.Models
 {
-    public class Antifraude
+    public class AntifraudeConsulta
     {
         public int IdContaOrigem { get; set; }
         public int IdContaDestino { get; set; }

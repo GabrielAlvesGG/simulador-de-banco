@@ -1,11 +1,14 @@
 ﻿using simulador_de_banco.Application.DTO;
-using simulador_de_banco.Application.Interface.IInfrastructure.Integration.IAntifraude;
-using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Email;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
-using simulador_de_banco.Application.Interface.IInfrastructure.Storage;
 using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Domain.Entidade;
+using simulador_de_banco.Application.Notification.Interface;
+using simulador_de_banco.Application.Notification.Models;
+using simulador_de_banco.Application.Antifraude.Interface;
+using simulador_de_banco.Application.Extrato.Interface;
+using simulador_de_banco.Application.Extrato.Models;
+using simulador_de_banco.Application.Antifraude.Models;
 
 namespace simulador_de_banco.Application.Services
 {
@@ -35,7 +38,7 @@ namespace simulador_de_banco.Application.Services
         {
             ValidateTransacao(transacaoRequestDto);
 
-            Antifraude antifraudeRequest = new Antifraude() { 
+            AntifraudeConsulta antifraudeRequest = new AntifraudeConsulta() { 
             IdContaDestino = transacaoRequestDto.IdContaDestino,
             IdContaOrigem = transacaoRequestDto.IdContaOrigem,
             Valor = transacaoRequestDto.Valor            
@@ -86,7 +89,7 @@ namespace simulador_de_banco.Application.Services
 
                 await _unitOfWork.CommitAsync(cancellationToken);
 
-                TransacaoEmailEnviar transacaoEmailEnviarRequest = new TransacaoEmailEnviar()
+                NotificationTransferencia transacaoEmailEnviarRequest = new NotificationTransferencia()
                 {
                     Email = contaOrigem.Email,
                     Nome = contaOrigem.Nome,
@@ -100,7 +103,17 @@ namespace simulador_de_banco.Application.Services
                 await _emailServices.EmailTransacaoContaOrigem(
                     transacaoEmailEnviarRequest, cancellationToken);
 
-                string caminhoExtrato = await _extratorServices.GerarExtratoTransacao(transferenciaId, contaOrigem.Id, contaDestino.Id, transacaoRequestDto.Valor, saldoAntigoContaOrigem, contaOrigem.Saldo, cancellationToken);
+                ExtratoBancarioTransacao extratoBancarioTransacao = new ExtratoBancarioTransacao()
+                {
+                    TransferenciaId = transferenciaId,
+                    ContaOrigemId = contaOrigem.Id,
+                    ContaDestinoId = contaDestino.Id,
+                    Valor = transacaoRequestDto.Valor,
+                    SaldoAnteriorContaOrigem = saldoAntigoContaOrigem,
+                    SaldoNovoContaOrigem = contaOrigem.Saldo
+                };
+
+                string caminhoExtrato = await _extratorServices.GerarExtratoTransacao(extratoBancarioTransacao, cancellationToken);
 
                 return new ResultadoTransferenciaResponseDto
                 {

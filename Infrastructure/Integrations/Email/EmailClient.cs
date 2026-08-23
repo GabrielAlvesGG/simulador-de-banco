@@ -1,5 +1,5 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Email;
-using simulador_de_banco.Domain.Entidade;
+﻿using simulador_de_banco.Application.Notification.Interface;
+using simulador_de_banco.Application.Notification.Models;
 using System.Net.Mail;
 
 namespace simulador_de_banco.Infrastructure.Integrations.email
@@ -7,7 +7,7 @@ namespace simulador_de_banco.Infrastructure.Integrations.email
     public class EmailClient :IEmailServices
     {
 
-        public async Task EmailTransacaoContaOrigem(TransacaoEmailEnviar transacaoEmailEnviarRequest, CancellationToken cancellationToken)
+        public async Task EmailTransacaoContaOrigem(NotificationTransferencia transacaoEmailEnviarRequest, CancellationToken cancellationToken)
         {
             using var smtpClient = new SmtpClient(
                     "smtp.exemplo.com",

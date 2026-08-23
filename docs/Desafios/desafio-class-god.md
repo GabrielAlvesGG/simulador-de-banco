@@ -32,3 +32,4 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 		
 		* Agora focando em refatoração dos parâmetros
 		* na refatoração dos parâmetros tive que entender melhor como funciona cada parte de camadas e qual camada podia conhecer parâmetros e instancias de outra camda a interface da application não pode conhecer classe relacionadas a repository por exemplo. Então tive que fazer uma boa refatoração para conseguir encapsular corretamente as propriedades.
+		* O ajuste atual está nas classes que foram criadas erradas dentro da domain. Vamos movelas para os lugares certos, começando com anotifications o real lugar dela é dentro de application.

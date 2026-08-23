@@ -1,16 +1,12 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Storage;
+﻿using simulador_de_banco.Application.Extrato.Interface;
+using simulador_de_banco.Application.Extrato.Models;
 
 namespace simulador_de_banco.Infrastructure.Storage
 {
     public class ExtratoFile : IExtratoServices
     {
         public async Task<string> GerarExtratoTransacao(
-            Guid transferenciaId,
-            int contaOrigemId,
-            int contaDestinoId,
-            decimal valor, 
-            decimal saldoAnteriorContaOrigem,
-            decimal saldoNovoContaOrigem,
+            ExtratoBancarioTransacao extratoBancarioTransacao,
             CancellationToken cancellationToken)
         {
             var extrato = $"""
@@ -18,13 +14,13 @@ namespace simulador_de_banco.Infrastructure.Storage
                     ----------------------------------
                     COMPROVANTE DE TRANSFERÊNCIA
 
-                    Código: {transferenciaId}
+                    Código: {extratoBancarioTransacao.TransferenciaId}
                     Data: {DateTime.Now:dd/MM/yyyy HH:mm:ss}
-                    Origem: {contaOrigemId}
-                    Destino: {contaDestinoId}
-                    Valor: {valor:C}
-                    Saldo anterior: {saldoAnteriorContaOrigem:C}
-                    Saldo atual: {saldoNovoContaOrigem:C}
+                    Origem: {extratoBancarioTransacao.ContaOrigemId}
+                    Destino: {extratoBancarioTransacao.ContaDestinoId}
+                    Valor: {extratoBancarioTransacao.Valor:C}
+                    Saldo anterior: {extratoBancarioTransacao.SaldoAnteriorContaOrigem:C}
+                    Saldo atual: {extratoBancarioTransacao.SaldoNovoContaOrigem:C}
                     Status: Concluída
                     ----------------------------------
                     """;
@@ -38,7 +34,7 @@ namespace simulador_de_banco.Infrastructure.Storage
 
             var caminhoExtrato = Path.Combine(
                 diretorioExtratos,
-                $"{transferenciaId}.txt");
+                $"{extratoBancarioTransacao.TransferenciaId}.txt");
 
             await File.WriteAllTextAsync(
                 caminhoExtrato,

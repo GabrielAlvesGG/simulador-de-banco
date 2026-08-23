@@ -1,8 +1,5 @@
-using simulador_de_banco.Application.Interface.IInfrastructure.Integration.IAntifraude;
-using simulador_de_banco.Application.Interface.IInfrastructure.Integration.Email;
 using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
-using simulador_de_banco.Application.Interface.IInfrastructure.Storage;
 using simulador_de_banco.Application.Interface.IServices;
 using simulador_de_banco.Application.Services;
 using simulador_de_banco.Infrastructure.Integrations.AntifraudeClientIntegrations;
@@ -11,6 +8,9 @@ using simulador_de_banco.Infrastructure.Persistence;
 using simulador_de_banco.Infrastructure.Repostory;
 using simulador_de_banco.Infrastructure.Storage;
 using simulador_de_banco.Infrastructure.Persistence.Interface;
+using simulador_de_banco.Application.Notification.Interface;
+using simulador_de_banco.Application.Antifraude.Interface;
+using simulador_de_banco.Application.Extrato.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 

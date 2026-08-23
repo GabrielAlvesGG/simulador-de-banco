@@ -1,6 +1,6 @@
-﻿namespace simulador_de_banco.Domain.Entidade
+﻿namespace simulador_de_banco.Application.Notification.Models
 {
-    public class TransacaoEmailEnviar
+    public class NotificationTransferencia
     {
         public string? Email { get; set; }
         public string? Nome { get; set; }

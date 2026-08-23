@@ -1,4 +1,5 @@
-﻿using simulador_de_banco.Application.Interface.IInfrastructure.Integration.IAntifraude;
+﻿using simulador_de_banco.Application.Antifraude.Interface;
+using simulador_de_banco.Application.Antifraude.Models;
 using simulador_de_banco.Domain.Entidade;
 
 namespace simulador_de_banco.Infrastructure.Integrations.AntifraudeClientIntegrations
@@ -10,7 +11,7 @@ namespace simulador_de_banco.Infrastructure.Integrations.AntifraudeClientIntegra
         {
             _httpClient = httpClient;
         }
-        public async Task<ResultadoAntiFraude> AntifraudeVerificaTransacao(Antifraude antifraudeRequest, CancellationToken cancellationToken)
+        public async Task<ResultadoAntiFraude> AntifraudeVerificaTransacao(AntifraudeConsulta antifraudeRequest, CancellationToken cancellationToken)
         {
             var analiseAntifraude = new
             {
