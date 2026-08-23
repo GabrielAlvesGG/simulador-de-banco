@@ -88,7 +88,6 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
         public async Task<Guid> RegistrarMovimentacaoAsync(Movimentacao movimentacao, CancellationToken cancellationToken)
         {
-            var transferenciaId = Guid.NewGuid();
 
             const string insertMovimentacao = """
                 INSERT INTO Movimentacoes
@@ -125,7 +124,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@Id",
-                transferenciaId);
+                movimentacao.Id);
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@ContaOrigemId",
@@ -141,20 +140,20 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@DataMovimentacao",
-                DateTime.UtcNow);
+                movimentacao.DataMovimentacao);
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@Tipo",
-                "TRANSFERENCIA");
+                movimentacao.Tipo);
 
             commandMovimentacao.Parameters.AddWithValue(
                 "@Status",
-                "CONCLUIDA");
+                movimentacao.Status);
 
             await commandMovimentacao.ExecuteNonQueryAsync(
                 cancellationToken);
 
-            return transferenciaId;
+            return movimentacao.Id;
 
         }
 
