@@ -1,285 +1,243 @@
 ﻿using Microsoft.Data.SqlClient;
-using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Application.DTO;
-using System.Net.Mail;
+using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
+using simulador_de_banco.Application.Interface.IInfrastructure.Repository;
 using simulador_de_banco.Domain.Entidade;
 using simulador_de_banco.Infrastructure.IntegrationModel;
+using simulador_de_banco.Infrastructure.Persistence;
+using System.Net.Mail;
+using System.Transactions;
 
 
 namespace simulador_de_banco.Infrastructure.Repostory
 {
     public class TransacoesRepository : ITransacoesRepository
     {
-        private readonly string _connectionString;
-        private readonly HttpClient _httpClient;
-        public TransacoesRepository(IConfiguration configuration, HttpClient httpClient)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public TransacoesRepository(IUnitOfWork sqlUnitOfWork)
         {
-            _connectionString = configuration.GetConnectionString("ConnectionStrings") ?? throw new InvalidOperationException(
-                    "A conexão com o banco não foi configurada.");
-            _httpClient = httpClient;
+            _unitOfWork = sqlUnitOfWork;
         }
 
-        public async Task<ResultadoTransferencia> TransferirAsync(
-           int contaOrigemId,
-           int contaDestinoId,
-           decimal valor,
-           CancellationToken cancellationToken = default)
-        {
-         
-
-            await using var connection =
-                new SqlConnection(_connectionString);
-
-            await connection.OpenAsync(cancellationToken);
-
-            await using var transaction =
-                (SqlTransaction)await connection.BeginTransactionAsync(
-                    cancellationToken);
-
-            try
-            {
-                var contaOrigem = await BuscarContaAsync(
-                    contaOrigemId,
-                    connection,
-                    transaction,
-                    cancellationToken);
-
-                var contaDestino = await BuscarContaAsync(
-                    contaDestinoId,
-                    connection,
-                    transaction,
-                    cancellationToken);
+        //public async Task<ResultadoTransferenciaDto> TransferirAsync(
+        //   int contaOrigemId,
+        //   int contaDestinoId,
+        //   decimal valor,
+        //   CancellationToken cancellationToken = default)
+        //{
 
 
-                // Jogar para servicess começo
-                if (contaOrigem is null)
-                    throw new InvalidOperationException(
-                        "Conta de origem não encontrada.");
+        //    await connection.OpenAsync(cancellationToken);
 
-                if (contaDestino is null)
-                    throw new InvalidOperationException(
-                        "Conta de destino não encontrada.");
+        //    await using var transaction =
+        //        (SqlTransaction)await connection.BeginTransactionAsync(
+        //            cancellationToken);
 
-                if (!contaOrigem.Ativa)
-                    throw new InvalidOperationException(
-                        "A conta de origem está bloqueada.");
+        //    try
+        //    {
+               
+        //        // Jogar para servicess fim 
+        //        var analiseAntifraude = new
+        //        {
+        //            ContaOrigem = contaOrigemId,
+        //            ContaDestino = contaDestinoId,
+        //            Valor = valor,
+        //            DataOperacao = DateTime.UtcNow
+        //        };
 
-                if (!contaDestino.Ativa)
-                    throw new InvalidOperationException(
-                        "A conta de destino está bloqueada.");
+        //        var respostaAntifraude = await _httpClient.PostAsJsonAsync(
+        //            "https://api-antifraude.exemplo.com/analises",
+        //            analiseAntifraude,
+        //            cancellationToken);
 
-                if (contaOrigem.Saldo < valor)
-                    throw new InvalidOperationException(
-                        "Saldo insuficiente.");
+        //        if (!respostaAntifraude.IsSuccessStatusCode)
+        //            throw new InvalidOperationException(
+        //                "Não foi possível consultar o serviço antifraude.");
 
-                var limiteDiario = 10_000m;
+        //        var resultadoAntifraude =
+        //            await respostaAntifraude.Content
+        //                .ReadFromJsonAsync<ResultadoAntifraude>(
+        //                    cancellationToken: cancellationToken);
 
-                if (valor > limiteDiario)
-                    throw new InvalidOperationException(
-                        "O valor ultrapassa o limite diário permitido.");
-                // Jogar para servicess fim 
-                var analiseAntifraude = new
-                {
-                    ContaOrigem = contaOrigemId,
-                    ContaDestino = contaDestinoId,
-                    Valor = valor,
-                    DataOperacao = DateTime.UtcNow
-                };
+        //        if (resultadoAntifraude is null ||
+        //            !resultadoAntifraude.Aprovado)
+        //        {
+        //            throw new InvalidOperationException(
+        //                "Transferência recusada pelo serviço antifraude.");
+        //        }
 
-                var respostaAntifraude = await _httpClient.PostAsJsonAsync(
-                    "https://api-antifraude.exemplo.com/analises",
-                    analiseAntifraude,
-                    cancellationToken);
+        //        // Responsabilidade 7: cálculo dos novos saldos
+        //        var novoSaldoOrigem = contaOrigem.Saldo - valor;
+        //        var novoSaldoDestino = contaDestino.Saldo + valor;
 
-                if (!respostaAntifraude.IsSuccessStatusCode)
-                    throw new InvalidOperationException(
-                        "Não foi possível consultar o serviço antifraude.");
+        //        // Responsabilidade 8: atualização direta no banco
+        //        await AtualizarSaldoAsync(
+        //            contaOrigemId,
+        //            novoSaldoOrigem,
+        //            connection,
+        //            transaction,
+        //            cancellationToken);
 
-                var resultadoAntifraude =
-                    await respostaAntifraude.Content
-                        .ReadFromJsonAsync<ResultadoAntifraude>(
-                            cancellationToken: cancellationToken);
+        //        await AtualizarSaldoAsync(
+        //            contaDestinoId,
+        //            novoSaldoDestino,
+        //            connection,
+        //            transaction,
+        //            cancellationToken);
 
-                if (resultadoAntifraude is null ||
-                    !resultadoAntifraude.Aprovado)
-                {
-                    throw new InvalidOperationException(
-                        "Transferência recusada pelo serviço antifraude.");
-                }
+        //        // Responsabilidade 9: gravação da movimentação
+        //        var transferenciaId = Guid.NewGuid();
 
-                // Responsabilidade 7: cálculo dos novos saldos
-                var novoSaldoOrigem = contaOrigem.Saldo - valor;
-                var novoSaldoDestino = contaDestino.Saldo + valor;
+        //        const string insertMovimentacao = """
+        //        INSERT INTO Movimentacoes
+        //        (
+        //            Id,
+        //            ContaOrigemId,
+        //            ContaDestinoId,
+        //            Valor,
+        //            DataMovimentacao,
+        //            Tipo,
+        //            Status
+        //        )
+        //        VALUES
+        //        (
+        //            @Id,
+        //            @ContaOrigemId,
+        //            @ContaDestinoId,
+        //            @Valor,
+        //            @DataMovimentacao,
+        //            @Tipo,
+        //            @Status
+        //        )
+        //        """;
 
-                // Responsabilidade 8: atualização direta no banco
-                await AtualizarSaldoAsync(
-                    contaOrigemId,
-                    novoSaldoOrigem,
-                    connection,
-                    transaction,
-                    cancellationToken);
+        //        await using var commandMovimentacao =
+        //            new SqlCommand(
+        //                insertMovimentacao,
+        //                connection,
+        //                transaction);
 
-                await AtualizarSaldoAsync(
-                    contaDestinoId,
-                    novoSaldoDestino,
-                    connection,
-                    transaction,
-                    cancellationToken);
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@Id",
+        //            transferenciaId);
 
-                // Responsabilidade 9: gravação da movimentação
-                var transferenciaId = Guid.NewGuid();
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@ContaOrigemId",
+        //            contaOrigemId);
 
-                const string insertMovimentacao = """
-                INSERT INTO Movimentacoes
-                (
-                    Id,
-                    ContaOrigemId,
-                    ContaDestinoId,
-                    Valor,
-                    DataMovimentacao,
-                    Tipo,
-                    Status
-                )
-                VALUES
-                (
-                    @Id,
-                    @ContaOrigemId,
-                    @ContaDestinoId,
-                    @Valor,
-                    @DataMovimentacao,
-                    @Tipo,
-                    @Status
-                )
-                """;
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@ContaDestinoId",
+        //            contaDestinoId);
 
-                await using var commandMovimentacao =
-                    new SqlCommand(
-                        insertMovimentacao,
-                        connection,
-                        transaction);
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@Valor",
+        //            valor);
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@Id",
-                    transferenciaId);
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@DataMovimentacao",
+        //            DateTime.UtcNow);
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@ContaOrigemId",
-                    contaOrigemId);
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@Tipo",
+        //            "TRANSFERENCIA");
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@ContaDestinoId",
-                    contaDestinoId);
+        //        commandMovimentacao.Parameters.AddWithValue(
+        //            "@Status",
+        //            "CONCLUIDA");
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@Valor",
-                    valor);
+        //        await commandMovimentacao.ExecuteNonQueryAsync(
+        //            cancellationToken);
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@DataMovimentacao",
-                    DateTime.UtcNow);
+        //        await transaction.CommitAsync(cancellationToken);
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@Tipo",
-                    "TRANSFERENCIA");
+        //        // Responsabilidade 10: envio de e-mail
+        //        using var smtpClient = new SmtpClient(
+        //            "smtp.exemplo.com",
+        //            587);
 
-                commandMovimentacao.Parameters.AddWithValue(
-                    "@Status",
-                    "CONCLUIDA");
+        //        smtpClient.EnableSsl = true;
 
-                await commandMovimentacao.ExecuteNonQueryAsync(
-                    cancellationToken);
+        //        using var mensagem = new MailMessage(
+        //            "banco@exemplo.com",
+        //            contaOrigem.Email);
 
-                await transaction.CommitAsync(cancellationToken);
+        //        mensagem.Subject = "Transferência realizada";
 
-                // Responsabilidade 10: envio de e-mail
-                using var smtpClient = new SmtpClient(
-                    "smtp.exemplo.com",
-                    587);
+        //        mensagem.Body = $"""
+        //        Olá, {contaOrigem.Nome}.
 
-                smtpClient.EnableSsl = true;
+        //        Sua transferência foi realizada com sucesso.
 
-                using var mensagem = new MailMessage(
-                    "banco@exemplo.com",
-                    contaOrigem.Email);
+        //        Conta de destino: {contaDestino.Numero}
+        //        Valor: {valor:C}
+        //        Saldo atual: {novoSaldoOrigem:C}
+        //        Código: {transferenciaId}
+        //        """;
 
-                mensagem.Subject = "Transferência realizada";
+        //        await smtpClient.SendMailAsync(
+        //            mensagem,
+        //            cancellationToken);
 
-                mensagem.Body = $"""
-                Olá, {contaOrigem.Nome}.
+        //        // Responsabilidade 11: geração de extrato
+        //        var extrato = $"""
+        //        BANCO EXEMPLO
+        //        ----------------------------------
+        //        COMPROVANTE DE TRANSFERÊNCIA
 
-                Sua transferência foi realizada com sucesso.
+        //        Código: {transferenciaId}
+        //        Data: {DateTime.Now:dd/MM/yyyy HH:mm:ss}
+        //        Origem: {contaOrigem.Numero}
+        //        Destino: {contaDestino.Numero}
+        //        Valor: {valor:C}
+        //        Saldo anterior: {contaOrigem.Saldo:C}
+        //        Saldo atual: {novoSaldoOrigem:C}
+        //        Status: Concluída
+        //        ----------------------------------
+        //        """;
 
-                Conta de destino: {contaDestino.Numero}
-                Valor: {valor:C}
-                Saldo atual: {novoSaldoOrigem:C}
-                Código: {transferenciaId}
-                """;
+        //        // Responsabilidade 12: gravação de arquivo
+        //        var diretorioExtratos = Path.Combine(
+        //            Directory.GetCurrentDirectory(),
+        //            "extratos");
 
-                await smtpClient.SendMailAsync(
-                    mensagem,
-                    cancellationToken);
+        //        Directory.CreateDirectory(diretorioExtratos);
 
-                // Responsabilidade 11: geração de extrato
-                var extrato = $"""
-                BANCO EXEMPLO
-                ----------------------------------
-                COMPROVANTE DE TRANSFERÊNCIA
+        //        var caminhoExtrato = Path.Combine(
+        //            diretorioExtratos,
+        //            $"{transferenciaId}.txt");
 
-                Código: {transferenciaId}
-                Data: {DateTime.Now:dd/MM/yyyy HH:mm:ss}
-                Origem: {contaOrigem.Numero}
-                Destino: {contaDestino.Numero}
-                Valor: {valor:C}
-                Saldo anterior: {contaOrigem.Saldo:C}
-                Saldo atual: {novoSaldoOrigem:C}
-                Status: Concluída
-                ----------------------------------
-                """;
+        //        await File.WriteAllTextAsync(
+        //            caminhoExtrato,
+        //            extrato,
+        //            cancellationToken);
 
-                // Responsabilidade 12: gravação de arquivo
-                var diretorioExtratos = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "extratos");
-
-                Directory.CreateDirectory(diretorioExtratos);
-
-                var caminhoExtrato = Path.Combine(
-                    diretorioExtratos,
-                    $"{transferenciaId}.txt");
-
-                await File.WriteAllTextAsync(
-                    caminhoExtrato,
-                    extrato,
-                    cancellationToken);
-
-                return new ResultadoTransferencia
-                {
-                    TransferenciaId = transferenciaId,
-                    ContaOrigemId = contaOrigemId,
-                    ContaDestinoId = contaDestinoId,
-                    Valor = valor,
-                    SaldoAnterior = contaOrigem.Saldo,
-                    SaldoAtual = novoSaldoOrigem,
-                    DataTransferencia = DateTime.UtcNow,
-                    CaminhoExtrato = caminhoExtrato,
-                    Status = "Concluída"
-                };
-            }
-            catch
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
-            }
-        }
+        //        return new ResultadoTransferenciaDto
+        //        {
+        //            TransferenciaId = transferenciaId,
+        //            ContaOrigemId = contaOrigemId,
+        //            ContaDestinoId = contaDestinoId,
+        //            Valor = valor,
+        //            SaldoAnterior = contaOrigem.Saldo,
+        //            SaldoAtual = novoSaldoOrigem,
+        //            DataTransferencia = DateTime.UtcNow,
+        //            CaminhoExtrato = caminhoExtrato,
+        //            Status = "Concluída"
+        //        };
+        //    }
+        //    catch
+        //    {
+        //        await transaction.RollbackAsync(cancellationToken);
+        //        throw;
+        //    }
+        //}
 
         // É voltado para parte de infra/repo
-        private static async Task<ContaCorrente?> BuscarContaAsync(
+        public async Task<ContaCorrente?> BuscarContaAsync(
             int contaId,
-            SqlConnection connection,
-            SqlTransaction transaction,
             CancellationToken cancellationToken)
         {
-            const string sql = """
+            string sql = """
             SELECT
                 Id,
                 Numero,
@@ -291,8 +249,11 @@ namespace simulador_de_banco.Infrastructure.Repostory
             WHERE Id = @Id
             """;
 
-            await using var command =
-                new SqlCommand(sql, connection, transaction);
+            var connection = _unitOfWork.Connection;
+
+            var transaction = _unitOfWork.Transaction ?? throw new InvalidOperationException("Nenhuma transação foi iniciada.");
+
+            await using var command = new SqlCommand(sql, connection, transaction);
 
             command.Parameters.AddWithValue("@Id", contaId);
 
@@ -315,11 +276,9 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
 
         // É voltado para parte de infra/repo
-        private static async Task AtualizarSaldoAsync(
+        public async Task AtualizarSaldoAsync(
             int contaId,
             decimal novoSaldo,
-            SqlConnection connection,
-            SqlTransaction transaction,
             CancellationToken cancellationToken)
         {
             const string sql = """
@@ -327,6 +286,11 @@ namespace simulador_de_banco.Infrastructure.Repostory
             SET Saldo = @Saldo
             WHERE Id = @Id
             """;
+
+
+            var connection = _unitOfWork.Connection;
+
+            var transaction = _unitOfWork.Transaction;
 
             await using var command =
                 new SqlCommand(sql, connection, transaction);
@@ -340,6 +304,77 @@ namespace simulador_de_banco.Infrastructure.Repostory
             if (registrosAlterados == 0)
                 throw new InvalidOperationException(
                     "Não foi possível atualizar o saldo da conta.");
+        }
+
+        public async Task RegistrarMovimentacaoAsync(int contaOrigemId,int contaDestinoId,decimal valor,CancellationToken cancellationToken)
+        {
+            // Responsabilidade 9: gravação da movimentação
+            var transferenciaId = Guid.NewGuid();
+
+            const string insertMovimentacao = """
+                INSERT INTO Movimentacoes
+                (
+                    Id,
+                    ContaOrigemId,
+                    ContaDestinoId,
+                    Valor,
+                    DataMovimentacao,
+                    Tipo,
+                    Status
+                )
+                VALUES
+                (
+                    @Id,
+                    @ContaOrigemId,
+                    @ContaDestinoId,
+                    @Valor,
+                    @DataMovimentacao,
+                    @Tipo,
+                    @Status
+                )
+                """;
+
+
+            var connection = _unitOfWork.Connection;
+            var transaction = _unitOfWork.Transaction;
+
+            await using var commandMovimentacao =
+                new SqlCommand(
+                    insertMovimentacao,
+                    connection,
+                    transaction);
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@Id",
+                transferenciaId);
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@ContaOrigemId",
+                contaOrigemId);
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@ContaDestinoId",
+                contaDestinoId);
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@Valor",
+                valor);
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@DataMovimentacao",
+                DateTime.UtcNow);
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@Tipo",
+                "TRANSFERENCIA");
+
+            commandMovimentacao.Parameters.AddWithValue(
+                "@Status",
+                "CONCLUIDA");
+
+            await commandMovimentacao.ExecuteNonQueryAsync(
+                cancellationToken);
+
         }
 
     }

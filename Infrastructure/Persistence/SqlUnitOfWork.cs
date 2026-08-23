@@ -1,9 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
+using simulador_de_banco.Application.Interface.IInfrastructure.Persistence;
 using System.Data;
 
 namespace simulador_de_banco.Infrastructure.Persistence
 {
-    public sealed class SqlUnitOfWork
+    public sealed class SqlUnitOfWork : ISqlUnitOfWork, IUnitOfWork
     {
 
         private readonly SqlConnection _connection;
@@ -16,7 +17,7 @@ namespace simulador_de_banco.Infrastructure.Persistence
         public SqlUnitOfWork(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("A conexão com o banco não foi configurada.")
+                ?? throw new InvalidOperationException("A conexão com o banco não foi configurada.");
 
                 _connection = new SqlConnection(connectionString);
         }
@@ -57,7 +58,7 @@ namespace simulador_de_banco.Infrastructure.Persistence
             await EncerrarTransacaoAsync();
         }
 
-        public async Task EncerrarTransacaoAsync()
+        private async Task EncerrarTransacaoAsync()
         {
             if (_transaction is null)
                 return;

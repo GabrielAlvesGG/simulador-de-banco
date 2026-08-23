@@ -1,6 +1,6 @@
 ﻿namespace simulador_de_banco.Application.DTO
 {
-    public class ResultadoTransferencia
+    public class ResultadoTransferenciaDto
     {
         public Guid TransferenciaId { get; set; }
         public int ContaOrigemId { get; set; }
