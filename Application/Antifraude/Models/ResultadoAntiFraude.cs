@@ -1,4 +1,4 @@
-﻿namespace simulador_de_banco.Domain.Entidade
+﻿namespace simulador_de_banco.Application.Antifraude.Models
 {
     public class ResultadoAntiFraude
     {
