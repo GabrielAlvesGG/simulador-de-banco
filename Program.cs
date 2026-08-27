@@ -24,10 +24,10 @@ builder.Services.AddScoped<IAntifraudeServices, AntifraudeClientIntegrations>();
 builder.Services.AddScoped<IEmailServices, EmailClient>();
 builder.Services.AddScoped<IExtratoServices, ExtratoFile>();
 
-builder.Services.AddScoped<SqlUnitOfWork>();
+builder.Services.AddScoped<simulador_de_banco.Infrastructure.Persistence.UnitOfWork>();
 
-builder.Services.AddScoped<ISqlUnitOfWorkServices>(provider => provider.GetRequiredService<SqlUnitOfWork>());
-builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<SqlUnitOfWork>());
+builder.Services.AddScoped((Func<IServiceProvider, IUnitOfWorkServices>)(provider => provider.GetRequiredService<simulador_de_banco.Infrastructure.Persistence.UnitOfWork>()));
+builder.Services.AddScoped((Func<IServiceProvider, simulador_de_banco.Infrastructure.Persistence.Interface.ISqlUnitOfWork>)(provider => (simulador_de_banco.Infrastructure.Persistence.Interface.ISqlUnitOfWork)provider.GetRequiredService<simulador_de_banco.Infrastructure.Persistence.UnitOfWork>()));
 
 builder.Services.AddScoped<HttpClient>();
 

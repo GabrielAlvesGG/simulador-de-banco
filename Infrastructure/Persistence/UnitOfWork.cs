@@ -5,7 +5,7 @@ using System.Data;
 
 namespace simulador_de_banco.Infrastructure.Persistence
 {
-    public sealed class SqlUnitOfWork : ISqlUnitOfWorkServices, IUnitOfWork
+    public sealed class UnitOfWork : IUnitOfWorkServices, ISqlUnitOfWork
     {
 
         private readonly SqlConnection _connection;
@@ -15,7 +15,7 @@ namespace simulador_de_banco.Infrastructure.Persistence
 
         public SqlTransaction? Transaction => _transaction;
 
-        public SqlUnitOfWork(IConfiguration configuration)
+        public UnitOfWork(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("A conexão com o banco não foi configurada.");

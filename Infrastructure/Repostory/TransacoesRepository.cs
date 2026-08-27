@@ -8,9 +8,9 @@ namespace simulador_de_banco.Infrastructure.Repostory
 {
     public class TransacoesRepository : ITransacoesServices
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly ISqlUnitOfWork _unitOfWork;
 
-        public TransacoesRepository(IUnitOfWork sqlUnitOfWork)
+        public TransacoesRepository(ISqlUnitOfWork sqlUnitOfWork)
         {
             _unitOfWork = sqlUnitOfWork;
         }
