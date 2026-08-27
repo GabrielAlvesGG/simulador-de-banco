@@ -17,12 +17,12 @@ namespace simulador_de_banco.Application.Services
     {
         private readonly ITransacoesServices _transacoesRepository;
 
-        private readonly ISqlUnitOfWorkServices _unitOfWork;
+        private readonly IUnitOfWorkServices _unitOfWork;
         private readonly IAntifraudeServices _antifraudeService;
         private readonly IEmailServices _emailServices;
         private readonly IExtratoServices _extratorServices;
         public ContaCorrenteService(ITransacoesServices transacoesRepository,
-            ISqlUnitOfWorkServices sqlUnitOfWork,
+            IUnitOfWorkServices sqlUnitOfWork,
             IAntifraudeServices antifraudeService,
             IEmailServices emailServices,
             IExtratoServices extratoServices)
@@ -36,7 +36,7 @@ namespace simulador_de_banco.Application.Services
 
         public async Task<ResultadoTransferenciaResponseDto> TransferirAsync(TransacaoRequestDto transacaoRequestDto, CancellationToken cancellationToken)
         {
-            ValidateTransacao(transacaoRequestDto);
+            ValidaTransacao(transacaoRequestDto);
 
             AntifraudeConsulta antifraudeRequest = new AntifraudeConsulta() { 
             IdContaDestino = transacaoRequestDto.IdContaDestino,
@@ -136,7 +136,7 @@ namespace simulador_de_banco.Application.Services
             }
         }
 
-        private void ValidateTransacao(TransacaoRequestDto transacaoRequestDto)
+        private void ValidaTransacao(TransacaoRequestDto transacaoRequestDto)
         {
 
             var limiteDiario = 10_000m;
