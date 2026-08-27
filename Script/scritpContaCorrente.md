@@ -1,6 +1,7 @@
 CREATE DATABASE simulador_de_banco
 
-CREATE TABLE ContasCorrentes(
+CREATE TABLE ContasCorrentes
+(
 Id INT PRIMARY KEY IDENTITY(1,1) NOT NULL, 
 Numero FLOAT (11) NOT NULL,
 Nome VARCHAR(100) NOT NULL,
@@ -10,7 +11,7 @@ Ativa BIT NOT NULL
 );
 
 
-	 CREATE TABLE Movimentacoes
+CREATE TABLE Movimentacoes
 (
     Id UNIQUEIDENTIFIER NOT NULL,
     ContaOrigemId INT NOT NULL,
