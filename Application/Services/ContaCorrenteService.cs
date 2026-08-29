@@ -9,6 +9,7 @@ using simulador_de_banco.Application.Antifraude.Interface;
 using simulador_de_banco.Application.Extrato.Interface;
 using simulador_de_banco.Application.Extrato.Models;
 using simulador_de_banco.Application.Antifraude.Models;
+using simulador_de_banco.Application.Mapper;
 
 namespace simulador_de_banco.Application.Services
 {
@@ -21,7 +22,7 @@ namespace simulador_de_banco.Application.Services
         private readonly IAntifraudeServices _antifraudeService;
         private readonly IEmailServices _emailServices;
         private readonly IExtratoServices _extratorServices;
-        private readonly 
+        private readonly IMapperRequests _mapperRequests;
         public ContaCorrenteService(ITransacoesServices transacoesRepository,
             IUnitOfWorkServices sqlUnitOfWork,
             IAntifraudeServices antifraudeService,
@@ -38,8 +39,8 @@ namespace simulador_de_banco.Application.Services
         public async Task<ResultadoTransferenciaResponseDto> TransferirAsync(TransacaoRequestDto transacaoRequestDto, CancellationToken cancellationToken)
         {
             ValidaTransacao(transacaoRequestDto);
-            MapeandoAntifraudeConsulta(transacaoRequestDto);
-            AntifraudeConsulta antifraudeRequest = 
+            
+            AntifraudeConsulta antifraudeRequest = _mapperRequests.MapeandoAntifraudeConsulta(transacaoRequestDto);
 
             await _antifraudeService.AntifraudeVerificaTransacao(antifraudeRequest, cancellationToken);
 
@@ -49,34 +50,25 @@ namespace simulador_de_banco.Application.Services
           
                 ContaCorrente? contaOrigem = await _transacoesRepository.BuscarContaAsync(transacaoRequestDto.IdContaOrigem,cancellationToken);
 
-                if (contaOrigem is null)
-                    throw new InvalidOperationException(
-                        "Conta de origem não encontrada.");
+                ContaCorrente contaCorrenteOperacoes = new ContaCorrente();
 
-                if (contaOrigem.Saldo < transacaoRequestDto.Valor)
-                    throw new InvalidOperationException("Saldo insuficiente.");
+                bool isContaOrigem = true;
 
-                if (!contaOrigem.Ativa)
-                    throw new InvalidOperationException(
-                        "A conta de origem está bloqueada.");
+                contaCorrenteOperacoes.ValidandoContaCorrente(contaOrigem, transacaoRequestDto.Valor, isContaOrigem);
 
                 ContaCorrente? contaDestino = await _transacoesRepository.BuscarContaAsync(transacaoRequestDto.IdContaDestino, cancellationToken);
 
-                if (contaDestino is null)
-                    throw new InvalidOperationException(
-                        "Conta de destino não encontrada.");  
+                bool isContaDestino = false;
 
-                if (!contaDestino.Ativa)
-                    throw new InvalidOperationException(
-                        "A conta de destino está bloqueada.");
-
+                contaCorrenteOperacoes.ValidandoContaCorrente(contaDestino, transacaoRequestDto.Valor, isContaDestino);
 
 
                 decimal saldoAntigoContaOrigem = contaOrigem.Saldo;
 
-                contaOrigem.Saldo = contaOrigem.Saldo - transacaoRequestDto.Valor; 
+                contaCorrenteOperacoes.Debitar(contaOrigem, transacaoRequestDto.Valor);
 
-                contaDestino.Saldo = contaDestino.Saldo + transacaoRequestDto.Valor;
+                contaCorrenteOperacoes.Creditar(contaDestino, transacaoRequestDto.Valor);
+
 
                 await _transacoesRepository.AtualizarSaldoAsync(contaOrigem.Id, contaOrigem.Saldo, cancellationToken);
 

@@ -3,7 +3,7 @@ using simulador_de_banco.Application.DTO;
 
 namespace simulador_de_banco.Application.Mapper
 {
-    public class IMapperRequests
+    public interface IMapperRequests
     {
         public AntifraudeConsulta MapeandoAntifraudeConsulta(TransacaoRequestDto transacaoRequestDto);
     }
