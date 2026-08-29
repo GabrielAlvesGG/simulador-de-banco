@@ -21,6 +21,7 @@ namespace simulador_de_banco.Application.Services
         private readonly IAntifraudeServices _antifraudeService;
         private readonly IEmailServices _emailServices;
         private readonly IExtratoServices _extratorServices;
+        private readonly 
         public ContaCorrenteService(ITransacoesServices transacoesRepository,
             IUnitOfWorkServices sqlUnitOfWork,
             IAntifraudeServices antifraudeService,
@@ -37,12 +38,8 @@ namespace simulador_de_banco.Application.Services
         public async Task<ResultadoTransferenciaResponseDto> TransferirAsync(TransacaoRequestDto transacaoRequestDto, CancellationToken cancellationToken)
         {
             ValidaTransacao(transacaoRequestDto);
-
-            AntifraudeConsulta antifraudeRequest = new AntifraudeConsulta() { 
-            IdContaDestino = transacaoRequestDto.IdContaDestino,
-            IdContaOrigem = transacaoRequestDto.IdContaOrigem,
-            Valor = transacaoRequestDto.Valor            
-            };
+            MapeandoAntifraudeConsulta(transacaoRequestDto);
+            AntifraudeConsulta antifraudeRequest = 
 
             await _antifraudeService.AntifraudeVerificaTransacao(antifraudeRequest, cancellationToken);
 
