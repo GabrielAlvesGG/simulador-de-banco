@@ -27,13 +27,15 @@ namespace simulador_de_banco.Application.Services
             IUnitOfWorkServices sqlUnitOfWork,
             IAntifraudeServices antifraudeService,
             IEmailServices emailServices,
-            IExtratoServices extratoServices)
+            IExtratoServices extratoServices,
+            IMapperRequests mapperRequests)
         {
             _transacoesRepository = transacoesRepository;
             _unitOfWork = sqlUnitOfWork;
             _antifraudeService = antifraudeService;
             _emailServices = emailServices;
             _extratorServices = extratoServices;
+            _mapperRequests = mapperRequests;
         }
 
         public async Task<ResultadoTransferenciaResponseDto> TransferirAsync(TransacaoRequestDto transacaoRequestDto, CancellationToken cancellationToken)

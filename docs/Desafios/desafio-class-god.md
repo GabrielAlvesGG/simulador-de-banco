@@ -34,6 +34,7 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 		* na refatoração dos parâmetros tive que entender melhor como funciona cada parte de camadas e qual camada podia conhecer parâmetros e instancias de outra camda a interface da application não pode conhecer classe relacionadas a repository por exemplo. Então tive que fazer uma boa refatoração para conseguir encapsular corretamente as propriedades.
 		* O ajuste atual está nas classes que foram criadas erradas dentro da domain. Vamos movelas para os lugares certos, começando com a notifications o real lugar dela é dentro de application.
 		* Nesse momento estou começando a extrair os contextos em questão de responsabilidade de cada uma e criar um monolito modular.
+<<<<<<< HEAD
 
 		* O objetivo atual é conseguir pegar as regras do dominio e conseguir passar para ele de forma correta.
 		* Tem muita coisa que era para ser feito dentro do dominio com entidade ou object value dentro do DDD, que estou afim de começar a implementar e também começar a entender como funciona.
@@ -41,3 +42,6 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 
 
 
+=======
+		* Outro ponto dentro da refatoração que está sendo feita dentro da pasta services é sobre a validação da injeção de dependência IMapperRequests ela não estava sendo referência no construtor.
+>>>>>>> 2793ac4 (Ajustando a injeção de dependência que não tinha sido implementada dentro do controller do services relacionado ao MapperRequests.)

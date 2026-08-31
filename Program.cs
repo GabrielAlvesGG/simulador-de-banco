@@ -11,6 +11,7 @@ using simulador_de_banco.Infrastructure.Persistence.Interface;
 using simulador_de_banco.Application.Notification.Interface;
 using simulador_de_banco.Application.Antifraude.Interface;
 using simulador_de_banco.Application.Extrato.Interface;
+using simulador_de_banco.Application.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddScoped<ITransacoesServices, TransacoesRepository>();
 builder.Services.AddScoped<IAntifraudeServices, AntifraudeClientIntegrations>();
 builder.Services.AddScoped<IEmailServices, EmailClient>();
 builder.Services.AddScoped<IExtratoServices, ExtratoFile>();
+builder.Services.AddScoped<IMapperRequests, MapperRequests>();
 
 builder.Services.AddScoped<simulador_de_banco.Infrastructure.Persistence.UnitOfWork>();
 
