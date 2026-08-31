@@ -11,8 +11,7 @@ namespace simulador_de_banco.Application.Interface.IInfrastructure.Repository
 
 
         public Task AtualizarSaldoAsync(
-            int contaId,
-            decimal novoSaldo,
+            ContaCorrente contaCorrente,
             CancellationToken cancellationToken);
 
         public Task RegistrarMovimentacaoAsync(Movimentacao movimentacao, CancellationToken cancellationToken);

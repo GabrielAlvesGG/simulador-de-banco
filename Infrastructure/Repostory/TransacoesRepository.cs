@@ -56,8 +56,7 @@ namespace simulador_de_banco.Infrastructure.Repostory
 
 
         public async Task AtualizarSaldoAsync(
-            int contaId,
-            decimal novoSaldo,
+            ContaCorrente contaCorrente,
             CancellationToken cancellationToken)
         {
             const string sql = """
@@ -74,8 +73,8 @@ namespace simulador_de_banco.Infrastructure.Repostory
             await using var command =
                 new SqlCommand(sql, connection, transaction);
 
-            command.Parameters.AddWithValue("@Saldo", novoSaldo);
-            command.Parameters.AddWithValue("@Id", contaId);
+            command.Parameters.AddWithValue("@Saldo", contaCorrente.Saldo);
+            command.Parameters.AddWithValue("@Id", contaCorrente.Id);
 
             var registrosAlterados =
                 await command.ExecuteNonQueryAsync(cancellationToken);

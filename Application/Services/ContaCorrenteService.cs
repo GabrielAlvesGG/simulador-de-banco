@@ -69,9 +69,9 @@ namespace simulador_de_banco.Application.Services
                 contaOrigem.Debitar(transacaoRequestDto.Valor);
                 contaDestino.Creditar(transacaoRequestDto.Valor);
 
-                await _transacoesRepository.AtualizarSaldoAsync(contaOrigem.Id, contaOrigem.Saldo, cancellationToken);
+                await _transacoesRepository.AtualizarSaldoAsync(contaOrigem, cancellationToken);
 
-                await _transacoesRepository.AtualizarSaldoAsync(contaDestino.Id, contaDestino.Saldo, cancellationToken);
+                await _transacoesRepository.AtualizarSaldoAsync(contaDestino, cancellationToken);
 
                 Movimentacao movimentacao = new Movimentacao(contaOrigem.Id, contaDestino.Id, transacaoRequestDto.Valor);
                 await _transacoesRepository.RegistrarMovimentacaoAsync(movimentacao, cancellationToken);
