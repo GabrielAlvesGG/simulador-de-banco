@@ -34,3 +34,10 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 		* na refatoração dos parâmetros tive que entender melhor como funciona cada parte de camadas e qual camada podia conhecer parâmetros e instancias de outra camda a interface da application não pode conhecer classe relacionadas a repository por exemplo. Então tive que fazer uma boa refatoração para conseguir encapsular corretamente as propriedades.
 		* O ajuste atual está nas classes que foram criadas erradas dentro da domain. Vamos movelas para os lugares certos, começando com a notifications o real lugar dela é dentro de application.
 		* Nesse momento estou começando a extrair os contextos em questão de responsabilidade de cada uma e criar um monolito modular.
+		* O objetivo atual é conseguir pegar as regras do dominio e conseguir passar para ele de forma correta.
+		* Tem muita coisa que era para ser feito dentro do dominio com entidade ou object value dentro do DDD, que estou afim de começar a implementar e também começar a entender como funciona.
+		* Uma das primeiras atitudes que tive nessa refatoração foi de retirar a referência que a entidade ContaCorrente tinha da application, pois estava dentro da domain a domain não contém dependencia de ninguém. Primeiro motivo que ela não estava sendo usada.
+
+		* Outro ponto dentro da refatoração que está sendo feita dentro da pasta services é sobre a validação da injeção de dependência IMapperRequests ela não estava sendo referência no construtor.
+		* Ajustando a injeção de dependência que não tinha sido implementada dentro do controller do services relacionado ao MapperRequests.
+		* Mais um ponto que agora vamos corrigir é a forma que atualizamos os dados dentro do nosso projeto, existe um problema na forma que temos a assinatura do método AtualizarSaldoAsync(). Os parâmetros de conta.Id e também poder passa o valor, faz com que isso seja uma liberdade que o sistema não pode ter, isso tem que fazer com que ele limite a atualizar o saldo dele de forma correta. Não podendo passar o valor mais sim fazendo da forma que o valor está dentro da entidade da instância.
