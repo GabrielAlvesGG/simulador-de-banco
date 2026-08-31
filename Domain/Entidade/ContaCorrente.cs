@@ -1,57 +1,67 @@
-﻿using simulador_de_banco.Application.DTO;
+﻿namespace simulador_de_banco.Domain.Entidade;
 
-namespace simulador_de_banco.Domain.Entidade
+public class ContaCorrente
 {
-    public class ContaCorrente
+    public int Id { get; }
+    public string Numero { get; }
+    public string Nome { get; }
+    public string Email { get; }
+    public decimal Saldo { get; private set; }
+    public bool Ativa { get; private set; }
+
+    public ContaCorrente(
+        int id,
+        string numero,
+        string nome,
+        string email,
+        decimal saldo,
+        bool ativa)
     {
-        public int Id { get; set; }
-        public string Numero { get; set; } = string.Empty;
-        public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public decimal Saldo { get; set; }
-        public bool Ativa { get; set; }
+        if (id <= 0)
+            throw new ArgumentException("Identificador de conta inválido.");
 
+        // Considerando que este simulador não permite cheque especial.
+        if (saldo < 0)
+            throw new ArgumentException("O saldo não pode ser negativo.");
 
-        public void ValidandoContaCorrente(ContaCorrente contaCorrente,decimal valor, bool isContaOrigem) {
-            EssaContaExiste(contaCorrente);
+        Id = id;
+        Numero = numero;
+        Nome = nome;
+        Email = email;
+        Saldo = saldo;
+        Ativa = ativa;
+    }
 
-            if(isContaOrigem)
-                 EssaContaContemSaldo(contaCorrente, valor);
+    public void Debitar(decimal valor)
+    {
+        ValidarValorPositivo(valor);
+        GarantirContaAtiva();
 
+        if (Saldo < valor)
+            throw new InvalidOperationException("Saldo insuficiente.");
 
-            ContaEstaAtiva(contaCorrente);
+        Saldo -= valor;
+    }
 
-        }
+    public void Creditar(decimal valor)
+    {
+        ValidarValorPositivo(valor);
+        GarantirContaAtiva();
 
-        private void EssaContaExiste(ContaCorrente contaCorrente)
-        {
-            if (contaCorrente is null)
-                throw new InvalidOperationException(
-                    "Conta não encontrada.");
-        }
+        Saldo += valor;
+    }
 
-        private void EssaContaContemSaldo(ContaCorrente contaCorrente,decimal valor)
-        {
+    private static void ValidarValorPositivo(decimal valor)
+    {
+        if (valor <= 0)
+            throw new ArgumentException(
+                "O valor deve ser maior que zero.");
+    }
 
-            if (contaCorrente.Saldo < valor)
-                throw new InvalidOperationException("Saldo insuficiente.");
-        }
-
-        private void ContaEstaAtiva(ContaCorrente contaCorrente)
-        {
-            if (!contaCorrente.Ativa)
-                throw new InvalidOperationException(
-                    "A conta de origem está bloqueada.");
-        }
-
-        public void Debitar(ContaCorrente contaOrigem,decimal valorDebitar)
-        {
-            contaOrigem.Saldo = contaOrigem.Saldo - valorDebitar;
-        }
-
-        public void Creditar(ContaCorrente contaDestino, decimal valorDebitar)
-        {
-            contaDestino.Saldo = contaDestino.Saldo + valorDebitar;
-        }
+    private void GarantirContaAtiva()
+    {
+        if (!Ativa)
+            throw new InvalidOperationException(
+                "A conta está bloqueada.");
     }
 }

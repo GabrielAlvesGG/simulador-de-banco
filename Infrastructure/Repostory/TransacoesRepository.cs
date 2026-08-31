@@ -44,15 +44,14 @@ namespace simulador_de_banco.Infrastructure.Repostory
             if (!await reader.ReadAsync(cancellationToken))
                 return null;
 
-            return new ContaCorrente
-            {
-                Id = reader.GetInt32(0),
-                Numero = reader.GetString(1),
-                Nome = reader.GetString(2),
-                Email = reader.GetString(3),
-                Saldo = reader.GetDecimal(4),
-                Ativa = reader.GetBoolean(5)
-            };
+            return new ContaCorrente(
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetDecimal(4),
+                reader.GetBoolean(5)
+                );
         }
 
 
