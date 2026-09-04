@@ -41,3 +41,16 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 		* Outro ponto dentro da refatoração que está sendo feita dentro da pasta services é sobre a validação da injeção de dependência IMapperRequests ela não estava sendo referência no construtor.
 		* Ajustando a injeção de dependência que não tinha sido implementada dentro do controller do services relacionado ao MapperRequests.
 		* Mais um ponto que agora vamos corrigir é a forma que atualizamos os dados dentro do nosso projeto, existe um problema na forma que temos a assinatura do método AtualizarSaldoAsync(). Os parâmetros de conta.Id e também poder passa o valor, faz com que isso seja uma liberdade que o sistema não pode ter, isso tem que fazer com que ele limite a atualizar o saldo dele de forma correta. Não podendo passar o valor mais sim fazendo da forma que o valor está dentro da entidade da instância.
+
+		* Agora o intuito é conseguir implementar testes dentro da nossa aplicação.
+		* O primeiro testes que vamos criar ele vai ser responsável por ver se o debito está ou não fazendo o a sua tarefa corretamente.
+		* Para começar a criação do testes, temos que criar um novo projeto do tipo Teste com xUnit que é um framework do asp.NET voltado para testes. Nomralmente também por boas práticas colocamos o nome da aplicação que vai ser testada e no final .Tests
+		* Após a criação desse projeto temos que refêrênciar ele com os projetos e bibliotecas que os testes iram utilizar.
+		* Logo após isso por padrão, já vem com uma classe que vamos renomear para fazer a criação do nosso primeiro testes.
+		* A princípio parece uma classe comum e realmente é a forma de criar uma classe para conseguir fazer a criação dos testes é padrão.
+		* Um ponto que muda um pouco é a questão que antes do método contém "[Fact]" ele é responsável para indicar ao xUnit que o método que vem abaixo é um teste.
+		* Nesse método que criamos a baixo do "[Fact]" ele vai ser responsável por testar o método Debitar() que está dentro do domain e ele é responsável por debitar um valor de uma conta 
+		* para fazer esse testes vamos criar um objeto ficticio da conta para conseguir fazer esse teste como se fosse uma conta realmente existente.
+		* logo após isso vamos chamar o método como se fosse em parte do sistema normal
+		* Logo após rodar esse teste temum ponto muito importante do teste que é utilizar o "Assert" ele é responsável por verificar se o código realmente retorno o resultado esperado e se o teste passou.
+		* Complementando o "Assert" é uma classe do xUnit que ajuda a conseguir encontrar valores que queremos como resultado para conseguir programar nossos testes tanto para resultados verdadeiros, falsos e referências de objetos null. Tudo isso é valido no momento do teste e também a questão do resultado esperado em valor igual.
