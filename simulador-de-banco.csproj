@@ -18,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+	  <Compile Remove="Teste\**\*.cs" />
+	  <Compile Remove="testes\**\*.cs" />
+	  <Compile Remove="tests\**\*.cs" />
     <Folder Include="Script\" />
   </ItemGroup>
 
