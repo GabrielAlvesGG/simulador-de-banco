@@ -44,7 +44,7 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 
 		* Agora o intuito é conseguir implementar testes dentro da nossa aplicação.
 		* O primeiro testes que vamos criar ele vai ser responsável por ver se o debito está ou não fazendo o a sua tarefa corretamente.
-		* Para começar a criação do testes, temos que criar um novo projeto do tipo Teste com xUnit que é um framework do asp.NET voltado para testes. Nomralmente também por boas práticas colocamos o nome da aplicação que vai ser testada e no final .Tests
+		* Para começar a criação do testes, temos que criar um novo projeto do tipo Teste com xUnit que é um framework do asp.NET voltado para testes. Normalmente também por boas práticas colocamos o nome da aplicação que vai ser testada e no final .Tests
 		* Após a criação desse projeto temos que refêrênciar ele com os projetos e bibliotecas que os testes iram utilizar.
 		* Logo após isso por padrão, já vem com uma classe que vamos renomear para fazer a criação do nosso primeiro testes.
 		* A princípio parece uma classe comum e realmente é a forma de criar uma classe para conseguir fazer a criação dos testes é padrão.
@@ -54,3 +54,5 @@ passo 1 - Migrar as responsabilidades com relação com o banco para infrastrutu
 		* logo após isso vamos chamar o método como se fosse em parte do sistema normal
 		* Logo após rodar esse teste temum ponto muito importante do teste que é utilizar o "Assert" ele é responsável por verificar se o código realmente retorno o resultado esperado e se o teste passou.
 		* Complementando o "Assert" é uma classe do xUnit que ajuda a conseguir encontrar valores que queremos como resultado para conseguir programar nossos testes tanto para resultados verdadeiros, falsos e referências de objetos null. Tudo isso é valido no momento do teste e também a questão do resultado esperado em valor igual.
+		* Criado um novo teste chamado para validar o creditar está atribuindo o valor correto dentro do saldo da conta, seguimos os mesmos passos de teste para debitar só que agora o valor que estamos testando é um valor referente ao que foi creditado na conta.
+		* Outro ponto importante é utilizar o padrão de desenvolvimento de testes AAA. Isso separa o desenvolvimento do teste em três etapas a primeira etapa é de organização, depois de ação que deve ser tomada e por último a validação do resultado.
